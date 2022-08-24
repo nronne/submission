@@ -15,14 +15,16 @@ def array():
     parser.add_argument('-a', '--args', type=str, default='-i $SLURM_ARRAY_TASK_ID', help='arguments for runscript')
     
     parser.add_argument('--submit-on-main', dest='scratch', action='store_false')
+    parser.add_argument('--dry-run', dest='dry', action='store_true')
     parser.add_argument('--config-file', dest='config_file', type=str)
     args = parser.parse_args()
 
     
     config = read(args.config_file)
-
+    
+    
     if args.array is None:
-        args.array = config['DEFAULT']['array']
+        args.array = [config['DEFAULT']['array']]
 
     if args.partition is None:
         args.partition = config['DEFAULT']['partition']
@@ -36,14 +38,17 @@ def array():
     if args.time is None:
         args.time = config['DEFAULT']['time']        
 
-    
 
     sm = SubmissionManager(args.runscript, config, args.array, args.partition, args.mem, args.ntasks_per_node, args.time,
                            arguments=args.args)
     
     
-    s = sm.make_job_file(scratch=args.scratch)
-    print(s)
+    sm.make_job_file('ARRAY', scratch=args.scratch, dry=args.dry)
+    print(args.dry)
+    exit()
+    if not args.dry:
+        sm.submit_job()
+    
 
     
 def sub():
