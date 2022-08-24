@@ -1,1 +1,8 @@
 * Command line SLURM submission system
+
+** install
+pip install -e .
+
+** Commands
+- array
+- sub
