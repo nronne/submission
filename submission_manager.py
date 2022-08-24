@@ -76,7 +76,7 @@ class SubmissionManager():
         
         s = self.config['DEFAULT']['SHEBANG']
         s += lb        
-        s += f"""{C} --jobname={self.runscript_name_no_ext}
+        s += f"""{C} --job-name={self.runscript_name_no_ext}
 {C} --partition={self.partition}
 {C} --ntasks-per-node={self.ntasks_per_node}
 {C} --cpus-per-task={self.cpus_per_task}

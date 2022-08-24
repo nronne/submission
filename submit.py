@@ -44,8 +44,6 @@ def array():
     
     
     sm.make_job_file('ARRAY', scratch=args.scratch, dry=args.dry)
-    print(args.dry)
-    exit()
     if not args.dry:
         sm.submit_job()
     
