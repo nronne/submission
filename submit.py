@@ -56,7 +56,7 @@ def sub():
     parser.add_argument('-m', '--mem', type=int)
     parser.add_argument('-n', '--ntasks-per-node', dest='ntasks_per_node', type=int)
     parser.add_argument('-t', '--time', type=int, help='Time in hours')
-    parser.add_argument('-a', '--args', type=str, default='-i $SLURM_ARRAY_TASK_ID', help='arguments for runscript')
+    parser.add_argument('-a', '--args', type=str, default='', help='arguments for runscript')
     
     parser.add_argument('--submit-on-scratch', dest='scratch', action='store_true')
     parser.add_argument('--dry-run', dest='dry', action='store_true')

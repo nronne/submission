@@ -1,6 +1,9 @@
 import subprocess
 import os
 
+class MissingRunscript(Exception):
+    pass
+
 class SubmissionManager():
 
     def __init__(self, path, config, array, partition, mem, ntasks_per_node, time, arguments='', nodes=1, cpus_per_task=1):
@@ -42,17 +45,14 @@ class SubmissionManager():
         
     def set_paths(self, path):
         self.full_path = os.path.abspath(path)
+
+        if not os.path.isfile(self.full_path):
+            raise MissingRunscript('No runscript file is found!')
+        
         self.directory_path = os.path.dirname(self.full_path)
         self.runscript_name = os.path.basename(self.full_path)
         self.runscript_name_no_ext, _ = os.path.splitext(self.runscript_name)
         self.main_dir, self.directory_name = os.path.split(self.directory_path)
-        # print(self.full_path)
-        # print(self.directory_path)
-        # print(self.runscript_name)
-        # print(self.runscript_name_no_ext)
-        # print(self.directory_name)
-        # print(self.main_dir)
-
 
         if self.directory_name == 'runscripts':
             self.data_dir = os.path.join(self.main_dir, 'data')
