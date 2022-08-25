@@ -5,6 +5,7 @@ from submission_manager import SubmissionManager
 def array():
     parser = argparse.ArgumentParser()
     parser.add_argument('runscript', type=str)
+    parser.add_argument('args', nargs='?', default='-i $SLURM_ARRAY_TASK_ID', type=str)
     parser.add_argument('-i', '--array', nargs='+',
                         help="The array job array to start. Either as int, slurm input str or several ints")
     
@@ -12,7 +13,7 @@ def array():
     parser.add_argument('-m', '--mem', type=int)
     parser.add_argument('-n', '--ntasks-per-node', dest='ntasks_per_node', type=int)
     parser.add_argument('-t', '--time', type=int, help='Time in hours')
-    parser.add_argument('-a', '--args', type=str, default='-i $SLURM_ARRAY_TASK_ID', help='arguments for runscript')
+    # parser.add_argument('-a', '--args', type=str, default='-i $SLURM_ARRAY_TASK_ID', help='arguments for runscript')
     
     parser.add_argument('--submit-on-main', dest='scratch', action='store_false')
     parser.add_argument('--dry-run', dest='dry', action='store_true')
@@ -52,11 +53,13 @@ def array():
 def sub():
     parser = argparse.ArgumentParser()
     parser.add_argument('runscript', type=str)
+    parser.add_argument('args', nargs='?', default='-i $SLURM_ARRAY_TASK_ID', type=str)
+    
     parser.add_argument('-p', '--partition', type=str)
     parser.add_argument('-m', '--mem', type=int)
     parser.add_argument('-n', '--ntasks-per-node', dest='ntasks_per_node', type=int)
     parser.add_argument('-t', '--time', type=int, help='Time in hours')
-    parser.add_argument('-a', '--args', type=str, default='', help='arguments for runscript')
+    # parser.add_argument('-a', '--args', type=str, default='', help='arguments for runscript')
     
     parser.add_argument('--submit-on-scratch', dest='scratch', action='store_true')
     parser.add_argument('--dry-run', dest='dry', action='store_true')

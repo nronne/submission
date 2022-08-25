@@ -27,7 +27,7 @@ class SubmissionManager():
         assert isinstance(array, list), 'Array must be list of strings'
         if len(array) == 1:
             try:
-                i = int(array[0])
+                i = int(array[0])-1
                 self.array = f'0-{i}'
                 self.array_list = list(range(i))
             except:
@@ -97,7 +97,8 @@ class SubmissionManager():
         s += lb
         
         if sub_type == 'ARRAY':
-            s += '{C} --array={self.array}'
+            s += f'{C} --array={self.array}'
+            
         s += lb
         s += self.config['DEFAULT']['SUBMIT'].format(C)
 
