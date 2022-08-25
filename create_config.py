@@ -12,22 +12,22 @@ config['DEFAULT'] = {
     'COMMAND': '#SBATCH ',
     'SUBMIT':
     """{0} --no-requeue
-    {0} --nodes=1
-    {0} --cpus-per-task=1
     """,
     'array': '10',
     'partition': 'q48,q40,q36,q28',
     'mem': '12',
+    'nodes': 1,
     'ntasks-per-node': '1',
+    'cpus-per-task': '1',
     'time': '6',
     'LOAD':
     """
-    source ~/.basrc
+    source ~/.bashrc
     workon AGOX
-    WD=$(pwd)
-    agox
-    git status
-    cd $WD
+    # WD=$(pwd)mj
+    # agox
+    # git status
+    # cd $WD
     
     """
 }
@@ -36,14 +36,14 @@ config['DEFAULT'] = {
 config['ARRAY'] = {
     'PRE':
     """
-    RUNDIR={0}/$SLURM_ARRAY_TASK_ID
+    RUNDIR={run_dir}/$SLURM_ARRAY_TASK_ID
     mkdir $RUNDIR
     cd $RUNDIR
-    cp {1} .
+    cp {full_path} .
     """,
     'DO':
     """
-    python {0} {1}
+    python {runscript_name} {arguments}
     """,
     'POST':
     """
@@ -53,33 +53,26 @@ config['ARRAY'] = {
     cd /scratch/$SLURM_JOB_ID
     mkdir $SLURM_ARRAY_TASK_ID
     cd $SLURM_ARRAY_TASK_ID
-    cp {0}/* .
+    cp {run_dir}/$SLURM_ARRAY_TASK_ID/* .
 
     while true; do
         sleep 60m
-        rsync -u * {0}/$SLURM_ARRAY_TASK_ID
+        rsync -u * {run_dir}/$SLURM_ARRAY_TASK_ID
     done &
     """,
     'POSTSCRATCH':
     """
-    rsync -u * {0}/$SLURM_ARRAY_TASK_ID
+    rsync -u * {run_dir}/$SLURM_ARRAY_TASK_ID
     """        
 }
 
 config['SUB'] = {
     'PRE':
     """
-    source ~/.basrc
-    workon AGOX
-    WD=$(pwd)
-    agox
-    git status
-    cd $WD
-    
     """,
     'DO':
     """
-    python {0} {1}
+    python {runscript_name} {arguments}
     """,
     'POST':
     """
@@ -89,11 +82,12 @@ config['SUB'] = {
     cd /scratch/$SLURM_JOB_ID
     mkdir $SLURM_ARRAY_TASK_ID
     cd $SLURM_ARRAY_TASK_ID
+    cp {full_path} .
     
     """,
     'POSTSCRATCH':
     """
-    
+    rsync * {directory_path}
     """        
 }
 

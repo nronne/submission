@@ -1,9 +1,10 @@
+import subprocess
 import os
 
 class SubmissionManager():
 
     def __init__(self, path, config, array, partition, mem, ntasks_per_node, time, arguments='', nodes=1, cpus_per_task=1):
-        self.set_names(path)
+        self.set_paths(path)
         self.config = config
         
         self.set_array(array)
@@ -39,7 +40,7 @@ class SubmissionManager():
             
                 
         
-    def set_names(self, path):
+    def set_paths(self, path):
         self.full_path = os.path.abspath(path)
         self.directory_path = os.path.dirname(self.full_path)
         self.runscript_name = os.path.basename(self.full_path)
@@ -66,11 +67,21 @@ class SubmissionManager():
         if not os.path.exists(self.run_dir):
             os.makedirs(self.run_dir)
 
-        
+
+        self.paths = {
+            'full_path': self.full_path,
+            'directory_path': self.directory_path,
+            'runscript_name': self.runscript_name,
+            'runscript_name_no_ext': self.runscript_name_no_ext,
+            'main_dir': self.main_dir,
+            'directory_name': self.directory_path,
+            'data_dir': self.data_dir,
+            'run_dir': self.run_dir
+        }
 
 
 
-    def make_job_file(self, name, scratch=True, dry=False):
+    def make_job_file(self, sub_type, scratch=True, dry=False):
         lb = '\n'
         C = self.config['DEFAULT']['COMMAND']
         
@@ -78,34 +89,38 @@ class SubmissionManager():
         s += lb        
         s += f"""{C} --job-name={self.runscript_name_no_ext}
 {C} --partition={self.partition}
+{C} --nodes={self.nodes}
 {C} --ntasks-per-node={self.ntasks_per_node}
 {C} --cpus-per-task={self.cpus_per_task}
 {C} --mem={self.mem}G
-{C} --time={self.time}:00:00
-{C} --array={self.array}"""
-        s += lb        
+{C} --time={self.time}:00:00"""
+        s += lb
+        
+        if sub_type == 'ARRAY':
+            s += '{C} --array={self.array}'
+        s += lb
         s += self.config['DEFAULT']['SUBMIT'].format(C)
 
         s += lb
-        s += self.config['DEFAULT']['LOAD'].format(self.run_dir)
+        s += self.config['DEFAULT']['LOAD']
         s += lb
 
         s += lb
-        s += self.config[name]['PRE'].format(self.run_dir, self.full_path)
+        s += self.config[sub_type]['PRE'].format(**self.paths)
         s += lb        
 
         if scratch:
-            s += self.config[name]['PRESCRATCH'].format(self.run_dir)
+            s += self.config[sub_type]['PRESCRATCH'].format(**self.paths)
             s += lb
         
-        s += self.config[name]['DO'].format(self.runscript_name, self.arguments)
+        s += self.config[sub_type]['DO'].format(**self.paths, arguments=self.arguments)
         
         if scratch:
-            s += self.config[name]['POSTSCRATCH'].format(self.run_dir)
+            s += self.config[sub_type]['POSTSCRATCH'].format(**self.paths)
             s += lb
         
         s += lb        
-        s += self.config[name]['POST']
+        s += self.config[sub_type]['POST'].format(**self.paths)
 
         if dry:
             print(s)
@@ -116,4 +131,5 @@ class SubmissionManager():
 
     def submit_job(self):
         os.chdir(self.run_dir)
-        os.system('sbatch run.job')
+        sbatch_out = str(subprocess.check_output('sbatch run.job', shell=True))
+        print(sbatch_out)
