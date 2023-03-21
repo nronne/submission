@@ -6,7 +6,11 @@ class MissingRunscript(Exception):
 
 class SubmissionManager():
 
-    def __init__(self, path, config, array, partition, mem, ntasks_per_node, time, arguments='', nodes=1, cpus_per_task=1):
+    def __init__(self, path, config, array, partition, mem, ntasks_per_node, time, gpus, arguments='',
+                 nodes=1, cpus_per_task=1, run_in_data_dir=True):
+
+        self.run_in_data_dir = run_in_data_dir
+        
         self.set_paths(path)
         self.config = config
         
@@ -21,6 +25,9 @@ class SubmissionManager():
         
         self.nodes = nodes
         self.cpus_per_task = cpus_per_task
+        self.gpus = gpus
+
+
 
 
     def set_array(self, array):
@@ -59,11 +66,15 @@ class SubmissionManager():
             if not os.path.exists(self.data_dir):
                 os.makedirs(self.data_dir)
         else:
-            self.data_dir = os.path.join(self.directory_path + 'data')
-            if not os.path.exists(self.data_dir):
+            self.data_dir = os.path.join(self.directory_path + '/data')
+            if not os.path.exists(self.data_dir) and self.run_in_data_dir:
                 os.makedirs(self.data_dir)
 
-        self.run_dir = os.path.join(self.data_dir, self.runscript_name_no_ext)
+        if self.run_in_data_dir:
+            self.run_dir = os.path.join(self.data_dir, self.runscript_name_no_ext)
+        else:
+            self.run_dir = os.path.join(self.directory_path, self.runscript_name_no_ext)
+            
         if not os.path.exists(self.run_dir):
             os.makedirs(self.run_dir)
 
@@ -98,7 +109,11 @@ class SubmissionManager():
         
         if sub_type == 'ARRAY':
             s += f'{C} --array={self.array}'
-            
+
+        s += lb
+        if self.gpus !=0:
+            s += f'{C} --gres=gpu:{self.gpus}'
+        
         s += lb
         s += self.config['DEFAULT']['SUBMIT'].format(C)
 

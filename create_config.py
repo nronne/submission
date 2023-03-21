@@ -36,6 +36,8 @@ config['DEFAULT'] = {
 config['ARRAY'] = {
     'PRE':
     """
+    export OMPI_MCA_orte_tmpdir_base=/scratch/$SLURM_JOB_ID
+
     RUNDIR={run_dir}/$SLURM_ARRAY_TASK_ID
     mkdir $RUNDIR
     cd $RUNDIR
@@ -56,12 +58,13 @@ config['ARRAY'] = {
     cp {run_dir}/$SLURM_ARRAY_TASK_ID/* .
 
     while true; do
-        sleep 60m
-        rsync -u * {run_dir}/$SLURM_ARRAY_TASK_ID
+        sleep 15m
+        rsync -u db*.db {run_dir}
     done &
     """,
     'POSTSCRATCH':
     """
+    rsync -u db*.db {run_dir}
     rsync -u * {run_dir}/$SLURM_ARRAY_TASK_ID
     """        
 }
@@ -72,7 +75,7 @@ config['SUB'] = {
     """,
     'DO':
     """
-    python {runscript_name} {arguments}
+    mpiexec python {full_path} {arguments}
     """,
     'POST':
     """
